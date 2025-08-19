@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Pac Cock — Peacock Pac-Man Clone</title>
+<title>Paccock — Peacock Pac-Man Clone</title>
 <meta name="description" content="Responsive Pac-Man style game. Play as a pixel peacock chased by ghosts. Single file." />
 <style>
   :root{
@@ -78,15 +78,19 @@ body::before{
   position:relative;
   overflow:hidden;
   width:100%;
-  max-width:100%;
+  max-width:800px;     /* limite central em desktop */
+  margin-left:auto;
+  margin-right:auto;   /* centraliza */
 }
 
 canvas{
   display:block;
-  width:100% !important;
-  height:auto !important;
-  aspect-ratio:28/31; /* mantém a proporção do mapa */
+  width:100%;
+  height:auto;
+  max-height:calc(100vh - 180px); /* nunca passa da altura visível */
+  aspect-ratio:28/31;             /* mantém proporção */
 }
+
 
   .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(8,12,20,.55),rgba(8,12,20,.75));backdrop-filter:blur(2px)}
   .card{background:#0e1524;border:1px solid #203152;border-radius:14px;padding:16px 14px;max-width:520px;text-align:center}
@@ -888,8 +892,14 @@ function fit(){
   const shell = document.getElementById('gameShell');
   const aspect = COLS / ROWS;
 
-  const targetW = shell.clientWidth;
-  const targetH = targetW / aspect;
+  let targetW = shell.clientWidth;
+  let targetH = targetW / aspect;
+
+  // garante que não passe da viewport
+  if(targetH > window.innerHeight - 200){
+    targetH = window.innerHeight - 200;
+    targetW = targetH * aspect;
+  }
 
   canvas.width = Math.round(targetW * devicePixelRatio);
   canvas.height = Math.round(targetH * devicePixelRatio);
@@ -899,6 +909,7 @@ function fit(){
   tile = Math.floor(canvas.width / COLS);
   shell.style.height = targetH + "px";
 }
+
 
   
   window.addEventListener('resize', fit, {passive: true});

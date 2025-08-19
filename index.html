@@ -12,7 +12,50 @@
     --wall:#132545; --wall-edge:#2d4d87; --floor:#071324; --gate:#20385e;
   }
   *{box-sizing:border-box}
-  html,body{height:100%;margin:0;background:radial-gradient(1200px 700px at 20% -10%,#152033 0%,#0b0f14 60%);color:var(--ink);font:14px/1.4 ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial;overflow-x:hidden}
+html,body{
+  height:100%;
+  margin:0;
+  background:linear-gradient(-45deg,#8B5CF6,#00C2FF,#FF2A6D,#00FFD1);
+  background-size:400% 400%;
+  animation:pulseGradient 12s ease infinite;
+  color:var(--ink);
+  font:14px/1.4 ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial;
+  overflow-x:hidden;
+  position:relative;
+}
+
+@keyframes pulseGradient {
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+
+/* linhas pulsando */
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background-image:linear-gradient(135deg,rgba(255,255,255,0.08) 1px,transparent 1px);
+  background-size:40px 40px;
+  animation:pulseLines 3s infinite;
+  pointer-events:none;
+}
+
+@keyframes pulseLines{
+  0%,100%{opacity:0.3}
+  50%{opacity:0.6}
+}
+
+/* mantém a caixa do game neutra */
+#gameShell{
+  margin-top:8px;
+  background:#0a0f1a; /* mantém dark sólido */
+  border:1px solid #1c263a;
+  border-radius:12px;
+  position:relative;
+  overflow:hidden;
+}
+
   .wrap{max-width:1100px;margin:0 auto;padding:10px}
   header{display:flex;align-items:center;justify-content:space-between;gap:10px;background:linear-gradient(180deg,#101623,#0e1420);border:1px solid #1c263a;border-radius:12px;padding:8px 10px}
   .brand{display:flex;align-items:center;gap:10px}

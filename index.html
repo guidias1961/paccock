@@ -53,7 +53,7 @@
       </div>
     </div>
     <div class="actions">
-      <a class="btn tw" href="https://x.com/" target="_blank" rel="noopener">🐦 Twitter</a>
+      <a class="btn tw" href="https://x.com/PacCock" target="_blank" rel="noopener">🐦 Twitter</a>
       <a class="btn buy" href="https://pump.tires" target="_blank" rel="noopener">🛒 Buy</a>
     </div>
   </header>
@@ -669,12 +669,20 @@
     const s = size/16, swing = Math.sin(tick*8)*1.2;
     ctx.save(); 
     ctx.translate(cx, cy);
+
+    // <<< ALTERAÇÃO AQUI: aplica espelhamento horizontal se andando para a esquerda >>>
+    if (dir === DIR.LEFT) {
+      ctx.scale(-1, 1);
+    }
+
     let rot = 0; 
-    if(dir === DIR.LEFT) rot = -0.05; 
+    // <<< ALTERAÇÃO AQUI: removido rot da esquerda (agora só vira com scale) >>>
     if(dir === DIR.RIGHT) rot = 0.05; 
     if(dir === DIR.UP) rot = -0.1; 
     if(dir === DIR.DOWN) rot = 0.1;
     ctx.rotate(rot);
+    
+    // --- resto igual ---
     
     // Desenha a cauda do pavão
     for(let i = 0; i < 7; i++){
@@ -748,6 +756,7 @@
     }
     ctx.restore();
   }
+
 
   function drawGhost(g, color, tick){
     const x = g.pixelX, y = g.pixelY, r = tile*0.34;

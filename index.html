@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
-<title>Paccock - Peacock Pac-Man Clone</title>
+<title>Pac-cock - Peacock Pac-Man Clone</title>
 <meta name="description" content="Responsive Pac-Man style game. Play as a pixel peacock chased by ghosts. Single file." />
 <style>
   :root{
@@ -35,7 +35,6 @@
     100%{background-position:0% 50%}
   }
 
-  /* linhas pulsando */
   body::before{
     content:"";
     position:fixed;
@@ -64,26 +63,26 @@
 
   #gameShell{
     margin-top:8px;
-    background:#0a0f1a; /* dark sólido */
+    background:#0a0f1a;
     border:1px solid #1c263a;
     border-radius:12px;
     position:relative;
     overflow:hidden;
     width:100%;
-    max-width:800px;     /* limite central em desktop */
+    max-width:800px;
     margin-left:auto;
-    margin-right:auto;   /* centraliza */
+    margin-right:auto;
+    touch-action:none; /* evita gestos que deslocam a página no mobile */
   }
 
-canvas{
-  display:block;
-  width:100%;
-  height:auto;
-  aspect-ratio:28/31;          /* mantém proporção do grid */
-  max-height:calc(100dvh - 220px); /* usa dvh p/ evitar barra de URL no mobile */
-  touch-action:none;           /* evita scroll por gesto */
-}
-
+  canvas{
+    display:block;
+    width:100%;
+    height:auto;
+    aspect-ratio:28/31;
+    max-height:calc(100dvh - 220px);
+    touch-action:none;
+  }
 
   .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(8,12,20,.55),rgba(8,12,20,.75));backdrop-filter:blur(2px)}
   .card{background:#0e1524;border:1px solid #203152;border-radius:14px;padding:16px 14px;max-width:520px;text-align:center}
@@ -113,7 +112,7 @@ canvas{
   }
   @media(max-width:420px){
     .btn{padding:6px 8px}
-    .touch button{width:64px;height:56px} /* aumenta alvo em telas bem pequenas */
+    .touch button{width:64px;height:56px}
   }
 </style>
 </head>
@@ -123,7 +122,7 @@ canvas{
     <div class="brand">
       <div class="dot" aria-hidden="true"></div>
       <div>
-        <h1>PacCock</h1>
+        <h1>Pac-Cock</h1>
         <div class="sub">Play as the Peacock. Eat pellets. Dodge ghosts.</div>
       </div>
     </div>
@@ -166,6 +165,7 @@ canvas{
 (()=> {
   const canvas = document.getElementById('game');
   const ctx = canvas.getContext('2d', { alpha: false });
+  const shell = document.getElementById('gameShell');
 
   const COLS = 28, ROWS = 31;
   let tile = 24;
@@ -726,53 +726,61 @@ canvas{
   bumpHUD(); 
   drawLives();
 
-  /* ---- Ajuste de tamanho mobile: usa visualViewport quando disponível ---- */
-function fit(){
-  const shell = document.getElementById('gameShell');
-  const aspect = COLS / ROWS;
+  // Ajuste total do tamanho, evitando escala dupla e realinhando entidades
+  function fit(){
+    const aspect = COLS / ROWS;
 
-  // Altura útil real da viewport (mais estável em mobile)
-  const viewportH = (window.visualViewport && window.visualViewport.height) ? window.visualViewport.height : window.innerHeight;
+    const viewportH = (window.visualViewport && window.visualViewport.height) ? window.visualViewport.height : window.innerHeight;
 
-  // Soma de header + HUD + paddings/intervalos
-  const headerH = document.querySelector('header')?.offsetHeight || 0;
-  const hudH = document.querySelector('.hud')?.offsetHeight || 0;
-  const wrapPad = 24; // margem/padding de segurança
-  const reserved = headerH + hudH + wrapPad;
+    const headerH = document.querySelector('header')?.offsetHeight || 0;
+    const hudH = document.querySelector('.hud')?.offsetHeight || 0;
+    const wrapPad = 24;
+    const reserved = headerH + hudH + wrapPad;
 
-  // Largura disponível no container e altura que sobra na viewport
-  const maxW = shell.clientWidth;            // largura do card
-  const maxH = Math.max(220, viewportH - reserved); // nunca deixa colapsar
+    const maxW = shell.clientWidth;
+    const maxH = Math.max(220, viewportH - reserved);
 
-  // Ajuste mantendo proporção
-  let targetW = Math.min(maxW, maxH * aspect);
-  let targetH = targetW / aspect;
+    let targetW = Math.min(maxW, maxH * aspect);
+    let targetH = targetW / aspect;
 
-  // Se sobrou altura, tenta crescer até o limite da largura do shell
-  if (targetH < maxH && (maxW / aspect) <= maxH) {
-    targetW = maxW;
-    targetH = targetW / aspect;
+    if (targetH < maxH && (maxW / aspect) <= maxH) {
+      targetW = maxW;
+      targetH = targetW / aspect;
+    }
+
+    const dpr = Math.max(1, Math.floor(window.devicePixelRatio || 1));
+    canvas.width  = Math.round(targetW * dpr);
+    canvas.height = Math.round(targetH * dpr);
+    canvas.style.width  = targetW + 'px';
+    canvas.style.height = targetH + 'px';
+
+    tile = Math.floor(canvas.width / COLS); // usa pixels físicos
+
+    shell.style.height = targetH + 'px';
+
+    // Reposiciona entidades no novo grid sem alterar o estado lógico
+    if (player){
+      player.pixelX = player.gridX * tile + tile/2;
+      player.pixelY = player.gridY * tile + tile/2;
+    }
+    if (ghosts && ghosts.length){
+      for (const g of ghosts){
+        g.pixelX = g.gridX * tile + tile/2;
+        g.pixelY = g.gridY * tile + tile/2;
+      }
+    }
   }
-
-  // Escala física do canvas (retina)
-  const dpr = Math.max(1, Math.floor(window.devicePixelRatio || 1));
-  canvas.width = Math.round(targetW * dpr);
-  canvas.height = Math.round(targetH * dpr);
-  canvas.style.width = targetW + 'px';
-  canvas.style.height = targetH + 'px';
-
-  tile = Math.floor(canvas.width / COLS); // mantém o grid coerente
-  shell.style.height = targetH + 'px';
-}
 
   window.addEventListener('resize', fit, {passive: true});
   if (window.visualViewport){
     window.visualViewport.addEventListener('resize', fit, {passive:true});
   }
   window.addEventListener('orientationchange', fit, {passive:true});
+  new ResizeObserver(()=>fit()).observe(shell);
+  window.addEventListener('load', fit, {passive:true});
   fit();
 
-  /* ---- Controles ---- */
+  /* Controles */
   function startGame(){
     if(!running){
       running = true; 
@@ -890,13 +898,10 @@ function fit(){
   }
 
   function render(tick){
-    const dpr = window.devicePixelRatio || 1;
-    ctx.save();
-    ctx.scale(dpr, dpr);
+    // Sem ctx.scale(dpr,dpr). Desenho já em pixels físicos do canvas
     drawBoard();
     ghosts.forEach((g, i) => drawGhost(g, ghostColors[i], tick));
     drawPeacock(player.pixelX, player.pixelY, tile*0.85, player.direction, tick);
-    ctx.restore();
   }
 
   function loop(now){

@@ -75,14 +75,15 @@
     margin-right:auto;   /* centraliza */
   }
 
-  canvas{
-    display:block;
-    width:100%;
-    height:auto;
-    max-height:calc(100svh - 180px); /* estabilidade em mobile */
-    aspect-ratio:28/31;              /* mantém proporção */
-    touch-action:none;               /* evita scroll em gestos */
-  }
+canvas{
+  display:block;
+  width:100%;
+  height:auto;
+  aspect-ratio:28/31;          /* mantém proporção do grid */
+  max-height:calc(100dvh - 220px); /* usa dvh p/ evitar barra de URL no mobile */
+  touch-action:none;           /* evita scroll por gesto */
+}
+
 
   .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(8,12,20,.55),rgba(8,12,20,.75));backdrop-filter:blur(2px)}
   .card{background:#0e1524;border:1px solid #203152;border-radius:14px;padding:16px 14px;max-width:520px;text-align:center}
@@ -726,28 +727,44 @@
   drawLives();
 
   /* ---- Ajuste de tamanho mobile: usa visualViewport quando disponível ---- */
-  function fit(){
-    const shell = document.getElementById('gameShell');
-    const aspect = COLS / ROWS;
-    const viewportH = (window.visualViewport && window.visualViewport.height) ? window.visualViewport.height : window.innerHeight;
+function fit(){
+  const shell = document.getElementById('gameShell');
+  const aspect = COLS / ROWS;
 
-    let targetW = shell.clientWidth;
-    let targetH = targetW / aspect;
+  // Altura útil real da viewport (mais estável em mobile)
+  const viewportH = (window.visualViewport && window.visualViewport.height) ? window.visualViewport.height : window.innerHeight;
 
-    if(targetH > viewportH - 200){
-      targetH = viewportH - 200;
-      targetW = targetH * aspect;
-    }
+  // Soma de header + HUD + paddings/intervalos
+  const headerH = document.querySelector('header')?.offsetHeight || 0;
+  const hudH = document.querySelector('.hud')?.offsetHeight || 0;
+  const wrapPad = 24; // margem/padding de segurança
+  const reserved = headerH + hudH + wrapPad;
 
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = Math.round(targetW * dpr);
-    canvas.height = Math.round(targetH * dpr);
-    canvas.style.width = targetW + "px";
-    canvas.style.height = targetH + "px";
+  // Largura disponível no container e altura que sobra na viewport
+  const maxW = shell.clientWidth;            // largura do card
+  const maxH = Math.max(220, viewportH - reserved); // nunca deixa colapsar
 
-    tile = Math.floor(canvas.width / COLS);
-    shell.style.height = targetH + "px";
+  // Ajuste mantendo proporção
+  let targetW = Math.min(maxW, maxH * aspect);
+  let targetH = targetW / aspect;
+
+  // Se sobrou altura, tenta crescer até o limite da largura do shell
+  if (targetH < maxH && (maxW / aspect) <= maxH) {
+    targetW = maxW;
+    targetH = targetW / aspect;
   }
+
+  // Escala física do canvas (retina)
+  const dpr = Math.max(1, Math.floor(window.devicePixelRatio || 1));
+  canvas.width = Math.round(targetW * dpr);
+  canvas.height = Math.round(targetH * dpr);
+  canvas.style.width = targetW + 'px';
+  canvas.style.height = targetH + 'px';
+
+  tile = Math.floor(canvas.width / COLS); // mantém o grid coerente
+  shell.style.height = targetH + 'px';
+}
+
   window.addEventListener('resize', fit, {passive: true});
   if (window.visualViewport){
     window.visualViewport.addEventListener('resize', fit, {passive:true});

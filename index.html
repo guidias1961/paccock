@@ -93,19 +93,43 @@
   .lives{display:flex;gap:6px;align-items:center}
   .life{width:16px;height:12px;border-radius:50% 50% 40% 40%/60% 60% 40% 40%;background:#07c3ff;box-shadow:0 0 10px #07c3ff}
 
+/* controles touch abaixo do jogo */
+.touch{
+  position: static;                 
+  display: grid;
+  gap: 8px;
+  grid-template-areas:
+    ".   up    ."
+    "left  .  right"
+    ".  down  .";
+  grid-template-columns: repeat(3, min(22vw, 90px));
+  grid-auto-rows: min(14vw, 64px);
+  justify-content: center;
+  margin: 12px auto 0;              
+  width: 100%;
+  max-width: calc(3 * min(22vw, 90px) + 2 * 8px);
+  user-select: none;
+  opacity: .98;
+}
+.touch button{
+  border:1px solid #2b3b5a;
+  background:#0d1526;
+  color:#cfe1ff;
+  border-radius:10px;
+  width:100%;                      
+  height:100%;
+  font-weight:700;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+@media(min-width:640px){
   .touch{
-    position:absolute;
-    right:8px;
-    bottom: max(8px, env(safe-area-inset-bottom, 8px));
-    display:grid; gap:6px;
-    grid-template-areas:"up" "left" "down" "right";
-    opacity:.95; user-select:none;
+    grid-template-columns: repeat(3, 90px);
+    grid-auto-rows: 64px;
+    max-width: 306px;
   }
-  .touch button{
-    border:1px solid #2b3b5a;background:#0d1526;color:#cfe1ff;border-radius:10px;
-    width:56px;height:44px;font-weight:700;
-    touch-action:manipulation; -webkit-tap-highlight-color:transparent;
-  }
+}
+
   @media(min-width:640px){
     .touch{grid-template-areas:"up up" "left right" "down down"; right:10px}
     .touch button{width:64px;height:52px}
@@ -151,13 +175,12 @@
         <div class="keys"><span class="key">←</span><span class="key">→</span><span class="key">↑</span><span class="key">↓</span><span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span></div>
       </div>
     </div>
-
-    <div class="touch" id="touch" aria-label="Touch controls">
+    </div>
+        <div class="touch" id="touch" aria-label="Touch controls">
       <button class="up"    style="grid-area:up">↑</button>
       <button class="left"  style="grid-area:left">←</button>
       <button class="down"  style="grid-area:down">↓</button>
       <button class="right" style="grid-area:right">→</button>
-    </div>
   </div>
 </div>
 

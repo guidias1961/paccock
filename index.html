@@ -110,50 +110,121 @@
   const midX = Math.floor(COLS/2);
 
   function carve(){
-    for(let x=0;x<COLS;x++){ grid[0][x]=T.WALL; grid[ROWS-1][x]=T.WALL; }
-    for(let y=0;y<ROWS;y++){ grid[y][0]=T.WALL; grid[y][COLS-1]=T.WALL; }
-
-    const barsH = [3,5,7,9,11,15,19,21,23,25];
-    const barsV = [4,8,12,16,20,24];
-
-    for(const y of barsH){
-      for(let x=2;x<COLS-2;x++){
-        if((x%6)===0 || (x%6)===3) continue;
-        grid[y][x]=T.WALL;
-      }
-    }
-    for(const x of barsV){
-      for(let y=2;y<ROWS-2;y++){
-        if((y%6)===0 || (y%6)===3) continue;
-        grid[y][x]=T.WALL;
-      }
-    }
-    for(const y of barsH){
-      for(const x of barsV){
-        if(grid[y][x]===T.WALL) grid[y][x]=T.PELLET;
+    // Inicia tudo vazio
+    for(let y=0;y<ROWS;y++){
+      for(let x=0;x<COLS;x++){
+        grid[y][x] = T.EMPTY;
       }
     }
 
-    for(let x=0;x<3;x++){ grid[midY][x]=T.PELLET; grid[midY][COLS-1-x]=T.PELLET; }
-    for(let x=0;x<3;x++){ grid[midY-1][x]=T.PELLET; grid[midY-1][COLS-1-x]=T.PELLET; }
-    for(let x=0;x<3;x++){ grid[midY+1][x]=T.PELLET; grid[midY+1][COLS-1-x]=T.PELLET; }
+    // Paredes externas
+    for(let x=0;x<COLS;x++){ 
+      grid[0][x]=T.WALL; 
+      grid[ROWS-1][x]=T.WALL; 
+    }
+    for(let y=0;y<ROWS;y++){ 
+      grid[y][0]=T.WALL; 
+      grid[y][COLS-1]=T.WALL; 
+    }
 
-    const hx0 = midX-3, hx1 = midX+3, hy0 = midY-1, hy1 = midY+2;
-    for(let y=hy0;y<=hy1;y++){
-      for(let x=hx0;x<=hx1;x++){
-        grid[y][x] = (y===hy0 || y===hy1 || x===hx0 || x===hx1) ? T.WALL : T.HOUSE;
+    // Blocos internos do Pac-Man clássico - posicionamento manual preciso
+    
+    // Linha superior (y=2)
+    for(let x=2; x<=5; x++) grid[2][x] = T.WALL;  // Bloco esquerdo superior
+    for(let x=7; x<=10; x++) grid[2][x] = T.WALL; // Bloco esquerdo-meio superior
+    for(let x=12; x<=15; x++) grid[2][x] = T.WALL; // Bloco centro superior
+    for(let x=17; x<=20; x++) grid[2][x] = T.WALL; // Bloco direito-meio superior
+    for(let x=22; x<=25; x++) grid[2][x] = T.WALL; // Bloco direito superior
+
+    // Linha y=3
+    grid[3][2] = T.WALL; grid[3][5] = T.WALL; // Cantos do bloco esquerdo
+    grid[3][7] = T.WALL; grid[3][10] = T.WALL; // Cantos do bloco esquerdo-meio
+    grid[3][12] = T.WALL; grid[3][15] = T.WALL; // Cantos do bloco centro
+    grid[3][17] = T.WALL; grid[3][20] = T.WALL; // Cantos do bloco direito-meio
+    grid[3][22] = T.WALL; grid[3][25] = T.WALL; // Cantos do bloco direito
+
+    // Linha y=4
+    grid[4][2] = T.WALL; grid[4][5] = T.WALL;
+    grid[4][7] = T.WALL; grid[4][20] = T.WALL; grid[4][22] = T.WALL; grid[4][25] = T.WALL;
+
+    // Blocos da área meio-superior
+    // Linha y=6
+    for(let x=2; x<=5; x++) grid[6][x] = T.WALL;
+    for(let x=7; x<=20; x++) grid[6][x] = T.WALL; // Bloco longo do meio
+    for(let x=22; x<=25; x++) grid[6][x] = T.WALL;
+
+    // Linha y=7 
+    grid[7][2] = T.WALL; grid[7][5] = T.WALL;
+    grid[7][7] = T.WALL; grid[7][20] = T.WALL;
+    grid[7][22] = T.WALL; grid[7][25] = T.WALL;
+
+    // Blocos verticais laterais
+    for(let y=9; y<=13; y++){
+      grid[y][7] = T.WALL; // Coluna esquerda
+      grid[y][20] = T.WALL; // Coluna direita
+    }
+
+    // Pequenos blocos horizontais no meio
+    for(let x=10; x<=11; x++) grid[9][x] = T.WALL;
+    for(let x=16; x<=17; x++) grid[9][x] = T.WALL;
+
+    // Blocos laterais médios
+    for(let x=2; x<=5; x++){
+      grid[9][x] = T.WALL;
+      grid[12][x] = T.WALL;
+    }
+    for(let x=22; x<=25; x++){
+      grid[9][x] = T.WALL;
+      grid[12][x] = T.WALL;
+    }
+
+    // Casa dos fantasmas (centro)
+    const hx0 = 10, hx1 = 17, hy0 = 14, hy1 = 17;
+    for(let y=hy0; y<=hy1; y++){
+      for(let x=hx0; x<=hx1; x++){
+        if(y===hy0 || y===hy1 || x===hx0 || x===hx1){
+          grid[y][x] = T.WALL;
+        } else {
+          grid[y][x] = T.HOUSE;
+        }
       }
     }
-    grid[hy0][midX] = T.GATE;
+    grid[hy0][13] = T.GATE; grid[hy0][14] = T.GATE; // Portão duplo
 
-    for(let y=hy0-6; y<hy0; y++){ grid[y][midX] = T.PELLET; }
-    grid[hy0-1][midX-1]=T.PELLET;
-    grid[hy0-1][midX+1]=T.PELLET;
+    // Espelha a parte inferior (simétrico)
+    for(let y=2; y<=12; y++){
+      const mirrorY = ROWS - 1 - y;
+      for(let x=1; x<COLS-1; x++){
+        if(grid[y][x] === T.WALL){
+          grid[mirrorY][x] = T.WALL;
+        }
+      }
+    }
 
-    grid[1][1]=T.POWER; grid[1][COLS-2]=T.POWER; grid[ROWS-2][1]=T.POWER; grid[ROWS-2][COLS-2]=T.POWER;
+    // Corrige alguns blocos específicos da parte inferior
+    for(let x=10; x<=11; x++) grid[21][x] = T.WALL;
+    for(let x=16; x<=17; x++) grid[21][x] = T.WALL;
 
-    for(let x=1;x<COLS-1;x++){ grid[1][x]=T.PELLET; grid[ROWS-2][x]=T.PELLET; }
-    for(let y=1;y<ROWS-1;y++){ grid[y][1]=T.PELLET; grid[y][COLS-2]=T.PELLET; }
+    // Preenche espaços vazios com pellets
+    for(let y=1; y<ROWS-1; y++){
+      for(let x=1; x<COLS-1; x++){
+        if(grid[y][x] === T.EMPTY){
+          // Não coloca pellets na área ao redor da casa dos fantasmas
+          if(x >= 9 && x <= 18 && y >= 13 && y <= 18) continue;
+          grid[y][x] = T.PELLET;
+        }
+      }
+    }
+
+    // Power pellets nos cantos
+    grid[3][1] = T.POWER;
+    grid[3][26] = T.POWER;
+    grid[27][1] = T.POWER;
+    grid[27][26] = T.POWER;
+
+    // Túnel do meio
+    for(let x=1; x<9; x++) grid[15][x] = T.PELLET; // Lado esquerdo
+    for(let x=19; x<COLS-1; x++) grid[15][x] = T.PELLET; // Lado direito
   }
   carve();
 
@@ -183,6 +254,7 @@
       this.targetX = x;       // Próximo tile X
       this.targetY = y;       // Próximo tile Y
       this.moving = false;    // Se está se movendo entre tiles
+      this.stuckCounter = 0;  // Contador para detectar travamentos
     }
 
     // Verifica se chegou ao centro do tile atual
@@ -219,8 +291,24 @@
       return tile !== T.WALL;
     }
 
-    // Atualiza movimento - versão Pac-Man original
+    // Atualiza movimento - versão Pac-Man original com correção de travamento
     update(){
+      // Detecta se ficou travado
+      if(!this.moving){
+        this.stuckCounter++;
+        if(this.stuckCounter > 10 && this.isGhost){ // Se fantasma ficou travado por muito tempo
+          // Força uma direção válida
+          const validDirs = DIRS_ORDER.filter(dir => this.canMoveTo(dir));
+          if(validDirs.length > 0){
+            this.direction = validDirs[Math.floor(Math.random() * validDirs.length)];
+            this.nextDirection = this.direction;
+            this.stuckCounter = 0;
+          }
+        }
+      } else {
+        this.stuckCounter = 0;
+      }
+
       // Se não está se movendo, verifica se pode começar a se mover
       if(!this.moving){
         // Tenta a próxima direção primeiro (apenas no centro do tile)
@@ -416,6 +504,7 @@
     player.direction = DIR.LEFT; 
     player.nextDirection = DIR.LEFT;
     player.moving = false;
+    player.stuckCounter = 0;
     
     const ghostStarts = [
       {x: midX-2, y: midY},
@@ -437,6 +526,7 @@
       g.releaseAt = RELEASE[i];
       g.state = 'normal';
       g.moving = false;
+      g.stuckCounter = 0;
     });
     
     frightened = 0; 
@@ -491,7 +581,8 @@
       });
       if(validDirs.length === 0){
         // Se não tem opção, pode reverter
-        return DIRS_ORDER.find(dir => g.canMoveTo(dir)) || g.direction;
+        const allValidDirs = DIRS_ORDER.filter(dir => g.canMoveTo(dir));
+        return allValidDirs.length > 0 ? allValidDirs[0] : g.direction;
       }
       return validDirs[Math.floor(Math.random() * validDirs.length)];
     }
@@ -838,9 +929,11 @@
           }
         } else if(g.state !== 'eaten'){
           // Movimento dentro da casa
-          if(here === T.HOUSE && g.isAtTileCenter()){
-            g.nextDirection = (Math.random() < 0.5) ? DIR.LEFT : DIR.RIGHT;
-            if(!g.canMoveTo(g.nextDirection)) g.nextDirection = DIR.UP;
+          if(here === T.HOUSE && g.isAtTileCenter() && Math.random() < 0.1){
+            const dirs = [DIR.LEFT, DIR.RIGHT, DIR.UP, DIR.DOWN].filter(d => g.canMoveTo(d));
+            if(dirs.length > 0){
+              g.nextDirection = dirs[Math.floor(Math.random() * dirs.length)];
+            }
           }
         }
       } else {
